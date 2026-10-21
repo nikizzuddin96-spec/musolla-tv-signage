@@ -82,7 +82,7 @@
 
     <div class="flex-1 overflow-y-auto p-6 md:p-8">
       
-      <!-- ================= TAB 1: Papan Pemuka ================= -->
+      <!-- TAB 1: Papan Pemuka -->
       <div id="tab-dashboard" class="tab-content block animate-fade-in">
         <h2 class="text-2xl font-bold mb-2">Papan Pemuka</h2>
         <p class="text-gray-500 text-sm mb-6">Ringkasan kandungan paparan TV Musolla.</p>
@@ -100,7 +100,7 @@
         </div>
       </div>
 
-      <!-- ================= TAB 2: Pustaka ================= -->
+      <!-- TAB 2: Pustaka -->
       <div id="tab-library" class="tab-content hidden animate-fade-in space-y-6">
         <div>
           <h2 class="text-2xl font-bold mb-1">Pustaka Media & Hebahan</h2>
@@ -167,7 +167,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
               </button>
               <button onclick="setViewMode('grid')" id="btnViewGrid" class="p-1.5 rounded text-gray-500 hover:text-gray-800 dark:hover:text-white transition" title="Pemandangan Kad Grid">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
               </button>
             </div>
           </div>
@@ -175,14 +175,13 @@
         </div>
       </div>
 
-      <!-- ================= TAB 3: Tetapan Skrin ================= -->
+      <!-- TAB 3: Tetapan Skrin -->
       <div id="tab-screens" class="tab-content hidden animate-fade-in space-y-6">
         <div>
           <h2 class="text-2xl font-bold mb-1">Tetapan Skrin TV</h2>
           <p class="text-gray-500 text-sm">Sesuaikan maklumat asas, layout, jadual solat pelajar, dan iqamah.</p>
         </div>
 
-        <!-- 1. Maklumat Asas & Layout -->
         <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div><label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nama Musolla</label><input id="mosqueName" type="text" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm outline-none" /></div>
@@ -204,7 +203,7 @@
           </div>
         </section>
 
-        <!-- 2. JADUAL SOLAT KHAS PELAJAR SEKOLAH -->
+        <!-- JADUAL SOLAT KHAS PELAJAR SEKOLAH -->
         <section class="bg-white dark:bg-gray-800 border-2 border-emerald-500/40 rounded-xl p-6 shadow-sm">
           <div class="flex items-center justify-between mb-4">
             <div>
@@ -238,7 +237,7 @@
           </div>
         </section>
 
-        <!-- 3. Durasi Iqamah & Senyap -->
+        <!-- Durasi Iqamah & Senyap -->
         <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
           <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4">Pengurusan Durasi Menunggu Iqamah & Mod Senyap</h3>
           <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
@@ -486,7 +485,6 @@
         document.getElementById('layoutStyle').value = data.layout || 'vertical';
         document.getElementById('tickerColorInput').value = data.tickerColor || '#334155';
         
-        // Tetapan Jadual Solat Pelajar
         document.getElementById('schoolScheduleEnabled').checked = data.schoolSchedule?.enabled !== false;
         document.getElementById('schoolZohorTime').value = data.schoolSchedule?.zohorSolatTime || '13:30';
         document.getElementById('schoolAsarTime').value = data.schoolSchedule?.asarSolatTime || '16:45';

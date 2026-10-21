@@ -17,6 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
+// Penstriman Video Tempatan (HTTP 206 Range)
 app.get('/uploads/:filename', (req, res, next) => {
   const filePath = path.join(UPLOAD_DIR, req.params.filename);
   if (!fs.existsSync(filePath)) return res.status(404).send('Fail tidak dijumpai.');
@@ -89,18 +90,17 @@ const defaultSettings = {
   zone: "PHG02",
   layout: "vertical",
   tickerColor: "#334155",
-  // Tetapan Waktu Solat Pelajar Sekolah (Fixed Time)
   schoolSchedule: {
     enabled: true,
-    zohorSolatTime: "13:30", // 1.30 PM
-    asarSolatTime: "16:45"    // 4.45 PM
+    zohorSolatTime: "13:30",
+    asarSolatTime: "16:45"
   },
   iqamah: { subuh: 15, zohor: 10, asar: 10, maghrib: 10, isyak: 10 },
   silentDuration: 12,
   slideDuration: 10,
   tickers: [
     "Selamat datang ke Musolla Ibnu Sina SRITIF.",
-    "Luruskan dan rapatkan saf. Sila diam di dalam musolla demi menjaga ketenteraman ibadah."
+    "Luruskan dan rapatkan saf. Pastikan telefon bimbit dimatikan atau berada dalam mod senyap."
   ],
   slides: [],
   updatedAt: new Date().toISOString()
@@ -124,6 +124,8 @@ function saveSettings(data) {
   return updated;
 }
 
+// Pengalihan automatik dari pautan utama ke paparan display
+app.get('/', (req, res) => res.redirect('/display'));
 app.get('/display', (req, res) => res.sendFile(path.join(__dirname, 'public', 'display.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
 
@@ -167,5 +169,5 @@ app.post('/api/upload', (req, res) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🕌 Pelayan TV MusollaSritif sedang beroperasi pada port ${PORT}!`);
+  console.log(`🕌 Pelayan TV MusollaSritif aktif pada port ${PORT}!`);
 });
