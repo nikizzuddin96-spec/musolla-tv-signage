@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Paparan TV MusollaSritif</title>
+
+  <!-- Tag Pengoptimuman Khas Samsung Smart TV / Kiosk Web App -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Sembunyikan bar skrol dan kursor remote Samsung TV */
+    html, body {
+      font-family: 'Inter', sans-serif;
+      user-select: none;
+      -webkit-user-select: none;
+      overflow: hidden;
+      background-color: #000000;
+      scrollbar-width: none; /* Firefox / Tizen */
+      -ms-overflow-style: none; /* IE / Edge */
+      cursor: none !important; /* Menghilangkan anak panah kursor TV */
+      width: 100vw;
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .font-mono-clock {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Animasi Ticker Tape Berjalan Lancar */
+    .ticker-wrapper {
+      overflow: hidden;
+      white-space: nowrap;
+      position: relative;
+      width: 100%;
+    }
+    .ticker-content {
+      display: inline-block;
+      padding-left: 100%;
+      animation: marquee 45s linear infinite;
+      will-change: transform;
+    }
+    @keyframes marquee {
+      0%   { transform: translate3d(0, 0, 0); }
+      100% { transform: translate3d(-100%, 0, 0); }
+    }
+
+    /* Penyerlah Kotak Solat Aktif */
+    .prayer-box {
+      transition: all 0.3s ease-in-out;
+    }
+    .prayer-active {
+      background: #059669 !important;
+      color: #ffffff !important;
+      border-color: #047857 !important;
+      box-shadow: 0 10px 25px -5px rgba(5, 150, 105, 0.45);
+      transform: scale(1.02);
+    }
+    .prayer-active .prayer-label { color: #a7f3d0 !important; }
+    .prayer-active .prayer-time { color: #ffffff !important; }
+
+    /* Pemain Video Fit-to-Screen */
+    video.media-4k-player, iframe.media-youtube-player {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border: none;
+      background-color: #000;
+      display: block;
+    }
+
+    .slide-media-item {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transition: opacity 0.8s ease-in-out;
+    }
+
+    /* Latar Belakang Saf Solat untuk Mod Iqamah & Solat */
+    .saf-bg {
+      background-image: linear-gradient(rgba(15, 23, 42, 0.88), rgba(6, 78, 59, 0.92)), url('https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+    }
+  </style>
+</head>
+<body class="bg-black text-slate-800 h-screen w-screen antialiased">
+
+  <div id="mainContainer" class="h-screen w-screen flex bg-slate-50 relative overflow-hidden transition-all duration-700">
+
+    <!-- SEKSYEN 1: MEDIA (GAMBAR, VIDEO 4K, YOUTUBE) -->
+    <section id="mediaSection" class="relative overflow-hidden bg-black shadow-2xl transition-all duration-700">
+      <div id="carouselContainer" class="w-full h-full relative overflow-hidden flex items-center justify-center bg-black"></div>
+
+      <!-- Label Imej -->
+      <div id="imageTopLeftOverlay" class="absolute top-6 left-6 z-20 flex space-x-2 pointer-events-none transition-opacity duration-500 opacity-100">
+        <span id="mediaCategoryBadge" class="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-white/95 text-emerald-800 backdrop-blur shadow-lg">
+          Hebahan
+        </span>
+      </div>
+
+      <!-- Label Video & Waktu 12 Jam (Semasa Video Bermain) -->
+      <div id="videoTopLeftOverlay" class="absolute top-6 left-6 z-30 flex items-center space-x-3 pointer-events-none transition-opacity duration-500 opacity-0">
+        <span class="px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider bg-red-600/95 text-white shadow-lg flex items-center space-x-2">
+          <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+          <span id="videoResolutionLabel">VIDEO</span>
+        </span>
+        <span class="px-4 py-1.5 rounded-full text-sm font-bold tracking-wider bg-black/60 text-white backdrop-blur-md shadow-lg flex items-center space-x-2 border border-white/20">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span id="videoClockText" class="font-mono-clock">12:00:00</span>
+          <span id="videoClockAmpm" class="text-[11px] font-bold text-emerald-400">AM</span>
+        </span>
+      </div>
+
+      <!-- Ticker Tape -->
+      <div id="tickerBar" class="absolute bottom-0 inset-x-0 h-14 bg-white/95 backdrop-blur border-t-4 border-emerald-500 flex items-center shadow-xl z-20 transition-all duration-500">
+        <div id="tickerBadge" class="bg-emerald-600 text-white h-full px-6 flex items-center justify-center font-bold uppercase tracking-wider shrink-0 text-sm">
+          Hebahan
+        </div>
+        <div class="ticker-wrapper flex-1 flex items-center">
+          <div id="tickerText" class="ticker-content text-xl font-semibold tracking-wide" style="color: #334155;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SEKSYEN 2: LOGO SEKOLAH, JAM & JADUAL SOLAT -->
+    <section id="infoSection" class="relative bg-white flex shadow-2xl z-30 transition-all duration-700">
+      
+      <!-- Kepala: Logo + Nama + Jam 12 Jam + Tarikh -->
+      <div id="infoHeader" class="flex flex-row items-center gap-4">
+        <img id="schoolLogo" src="/logo-sekolah.png" alt="Logo SRITIF" class="w-20 h-20 xl:w-24 xl:h-24 object-contain shrink-0 drop-shadow-md" onerror="this.style.display='none'" />
+        
+        <div class="flex flex-col justify-center text-left">
+          <h1 id="mosqueName" class="font-extrabold text-slate-800 leading-tight">Musolla Ibnu Sina</h1>
+          
+          <div class="flex items-baseline space-x-2 mt-0.5">
+            <span id="digitalClock" class="font-mono-clock font-extrabold text-emerald-600 tracking-tight leading-none">12:00:00</span>
+            <span id="clockAmpm" class="font-mono-clock font-bold text-emerald-700 text-base uppercase">AM</span>
+          </div>
+
+          <div class="flex flex-col space-y-0.5 mt-1">
+            <span id="gregorianDate" class="font-semibold text-slate-600 text-sm">Rabu, 21 Oktober 2026</span>
+            <span id="hijriDate" class="font-bold text-emerald-600 text-xs">Memuatkan...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kad Solat Seterusnya -->
+      <div id="countdownBox" class="flex items-center justify-center bg-slate-50 border border-slate-200 text-center shadow-inner">
+        <div class="flex flex-col items-center">
+          <p class="font-bold uppercase tracking-widest text-slate-500 mb-0.5">Menuju Waktu <span id="nextPrayerName" class="text-emerald-600">ZOHOR</span></p>
+          <div id="countdownTimer" class="font-mono-clock font-extrabold text-slate-800">00:00:00</div>
+        </div>
+      </div>
+
+      <!-- Grid 6 Waktu Solat -->
+      <div id="prayerGrid" class="flex-1 grid"></div>
+    </section>
+  </div>
+
+  <!-- OVERLAY SKRIN IQAMAH & SOLAT -->
+  <div id="prayerOverlay" class="hidden fixed inset-0 z-50 saf-bg flex flex-col items-center justify-center text-center p-8 backdrop-blur-sm">
+    
+    <!-- KANDUNGAN WAKTU IQAMAH -->
+    <div id="iqamahOverlayContent" class="hidden max-w-4xl bg-slate-900/80 p-10 rounded-3xl border-2 border-emerald-500/50 shadow-2xl backdrop-blur-md">
+      <div class="inline-flex items-center space-x-3 px-6 py-2 rounded-full bg-red-600/90 text-white font-extrabold uppercase tracking-widest text-base shadow-lg animate-pulse mb-4">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+        <span>SILA DIAM DI DALAM MUSOLLA</span>
+      </div>
+
+      <h2 class="text-4xl lg:text-5xl font-extrabold text-white mt-2 uppercase">
+        SOLAT BERJEMAAH <span id="overlayPrayerTitle" class="text-emerald-400">ZOHOR</span>
+      </h2>
+      <p class="text-xl text-slate-300 mt-2 font-medium">Iqamah akan dilaungkan dalam masa:</p>
+      
+      <div id="iqamahCountdown" class="font-mono-clock text-8xl lg:text-9xl font-extrabold text-emerald-400 my-6 tracking-tight drop-shadow-md">
+        10:00
+      </div>
+
+      <div class="bg-emerald-950/60 border border-emerald-500/40 rounded-2xl py-3 px-6 inline-block">
+        <p class="text-lg text-emerald-200 font-semibold">Ambil tempat, luruskan saf dan bersedia untuk solat.</p>
+      </div>
+    </div>
+
+    <!-- KANDUNGAN SEMASA SOLAT (MOD SENYAP) -->
+    <div id="silentOverlayContent" class="hidden max-w-4xl bg-slate-900/85 p-10 rounded-3xl border-2 border-emerald-500/50 shadow-2xl backdrop-blur-md">
+      <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center">
+        <svg class="w-10 h-10 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+      </div>
+      
+      <div class="inline-block px-6 py-2 rounded-full bg-red-600 text-white font-extrabold uppercase tracking-widest text-lg shadow-lg mb-4">
+        SILA DIAM DI DALAM MUSOLLA
+      </div>
+
+      <h2 class="text-5xl lg:text-6xl font-extrabold text-emerald-400 uppercase tracking-wide">
+        Solat Sedang Didirikan
+      </h2>
+      <p class="text-2xl text-slate-100 mt-4 leading-relaxed font-medium">
+        Luruskan dan rapatkan saf. Pastikan telefon bimbit dimatikan sepenuhnya.
+      </p>
+      <p id="silentRemainingText" class="font-mono-clock text-base text-slate-400 mt-6"></p>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_SETTINGS = 'musolla_tv_settings_v11';
+    const STORAGE_PRAYER = 'musolla_tv_prayer_v11';
+    
+    let appSettings = { 
+      layout: "vertical", 
+      slides: [], 
+      iqamah: { subuh: 15, zohor: 10, asar: 10, maghrib: 10, isyak: 10 }, 
+      schoolSchedule: { enabled: true, zohorSolatTime: "13:30", asarSolatTime: "16:45" },
+      tickers: [], 
+      slideDuration: 10, 
+      tickerColor: "#334155" 
+    };
+    
+    let todayPrayers = { subuh: "05:55", syuruk: "07:05", zohor: "01:15", asar: "04:30", maghrib: "07:20", isyak: "08:30", hijri: "" };
+    let activeSlidesList = [];
+    let currentSlideIndex = 0;
+    let slideTimeout = null;
+    let isPrayerOverlayActive = false;
+    let ytPlayers = {};
+    let isYTReady = false;
+
+    // Pemuat Iframe YouTube API
+    window.onYouTubeIframeAPIReady = function() {
+      isYTReady = true;
+      if (activeSlidesList.length > 0) initYouTubePlayers();
+    };
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function getMediaType(slide) {
+      if (!slide || !slide.url) return 'image';
+      if (slide.type === 'youtube' || extractYouTubeId(slide.url)) return 'youtube';
+      if (slide.type === 'video' || /\.(mp4|webm|mkv|mov)(\?.*)?$/i.test(slide.url)) return 'video';
+      return 'image';
+    }
+
+    function applyLayout(isVideoActive = false) {
+      const baseLayout = appSettings.layout || 'vertical';
+      const currentLayout = isVideoActive ? 'video-fullscreen' : baseLayout;
+      
+      const main = document.getElementById('mainContainer');
+      const media = document.getElementById('mediaSection');
+      const info = document.getElementById('infoSection');
+      const ticker = document.getElementById('tickerBar');
+      const header = document.getElementById('infoHeader');
+      const countdown = document.getElementById('countdownBox');
+      const pGrid = document.getElementById('prayerGrid');
+      const schoolLogo = document.getElementById('schoolLogo');
+      
+      const videoTopLeft = document.getElementById('videoTopLeftOverlay');
+      const imageTopLeft = document.getElementById('imageTopLeftOverlay');
+
+      main.className = 'h-screen w-screen flex relative overflow-hidden transition-all duration-700 bg-black';
+
+      if (currentLayout === 'video-fullscreen') {
+        main.classList.add('flex-col');
+        media.className = 'absolute inset-0 w-full h-full z-10 bg-black overflow-hidden';
+        info.className = 'hidden'; 
+        ticker.className = 'hidden';
+        
+        if (videoTopLeft) videoTopLeft.classList.replace('opacity-0', 'opacity-100');
+        if (imageTopLeft) imageTopLeft.classList.replace('opacity-100', 'opacity-0');
+      } 
+      else {
+        if (videoTopLeft) videoTopLeft.classList.replace('opacity-100', 'opacity-0');
+        if (imageTopLeft) imageTopLeft.classList.replace('opacity-0', 'opacity-100');
+        
+        if (baseLayout === 'vertical') {
+          main.classList.add('flex-row', 'bg-slate-50');
+          media.className = 'w-[68%] h-full relative overflow-hidden bg-black shadow-2xl z-10 transition-all duration-700';
+          info.className = 'w-[32%] h-full relative bg-white flex flex-col justify-between shadow-2xl border-l border-slate-200 z-30 transition-all duration-700';
+          ticker.className = 'absolute bottom-0 inset-x-0 h-14 bg-white/95 backdrop-blur border-t-4 border-emerald-500 flex items-center z-20';
+          
+          header.className = 'p-6 flex flex-row items-center gap-4 text-left border-b border-slate-100';
+          schoolLogo.className = 'w-20 h-20 xl:w-24 xl:h-24 object-contain shrink-0';
+          document.getElementById('mosqueName').className = 'text-xl xl:text-2xl font-extrabold text-slate-800 leading-tight';
+          document.getElementById('digitalClock').className = 'font-mono-clock text-4xl xl:text-5xl font-extrabold text-emerald-600 tracking-tight';
+          document.getElementById('clockAmpm').className = 'font-mono-clock font-bold text-emerald-700 text-sm xl:text-base uppercase';
+          
+          countdown.className = 'mx-6 p-4 bg-slate-50 rounded-2xl border border-slate-200 text-center shadow-inner';
+          document.querySelector('#countdownBox p').className = 'text-xs font-bold uppercase tracking-widest text-slate-500 mb-1';
+          document.getElementById('countdownTimer').className = 'font-mono-clock text-4xl font-extrabold text-slate-800';
+          pGrid.className = 'p-6 flex-1 grid grid-cols-1 gap-2.5';
+        } 
+        else if (baseLayout === 'horizontal') {
+          main.classList.add('flex-col', 'bg-slate-50');
+          media.className = 'w-full h-[73vh] min-h-[73vh] relative overflow-hidden bg-black shadow-2xl z-10 transition-all duration-700';
+          info.className = 'w-full h-[27vh] min-h-[27vh] relative bg-white flex flex-row items-center justify-between px-6 z-30 border-t border-slate-200 transition-all duration-700';
+          ticker.className = 'absolute bottom-0 inset-x-0 h-12 bg-white/90 backdrop-blur border-t-4 border-emerald-500 flex items-center z-20';
+          
+          header.className = 'flex flex-row items-center gap-3 text-left w-[28%] shrink-0 pr-4';
+          schoolLogo.className = 'w-16 h-16 xl:w-20 xl:h-20 object-contain shrink-0';
+          document.getElementById('mosqueName').className = 'text-lg font-extrabold text-slate-800 leading-tight truncate';
+          document.getElementById('digitalClock').className = 'font-mono-clock text-3xl xl:text-4xl font-extrabold text-emerald-600 tracking-tight';
+          document.getElementById('clockAmpm').className = 'font-mono-clock font-bold text-emerald-700 text-xs uppercase';
+          
+          countdown.className = 'p-3 bg-slate-50 rounded-2xl border border-slate-200 text-center shadow-inner w-1/6 shrink-0 mr-4';
+          pGrid.className = 'flex-1 grid grid-cols-6 gap-3';
+        }
+        else if (baseLayout === 'fullscreen') {
+          main.classList.add('flex-col', 'bg-black');
+          media.className = 'absolute inset-0 w-full h-full z-0 bg-black overflow-hidden transition-all duration-700';
+          info.className = 'absolute bottom-0 inset-x-0 h-[24vh] bg-white/90 backdrop-blur-xl border-t border-white/60 flex flex-row items-center justify-between px-8 z-30 shadow-[0_-10px_35px_rgba(0,0,0,0.15)] transition-all duration-700';
+          ticker.className = 'absolute top-0 inset-x-0 h-12 bg-emerald-700/95 backdrop-blur text-white flex items-center z-20 shadow-md border-b border-emerald-600';
+          
+          header.className = 'flex flex-row items-center gap-4 text-left w-[28%] shrink-0 pr-4';
+          schoolLogo.className = 'w-16 h-16 xl:w-20 xl:h-20 object-contain shrink-0';
+          document.getElementById('mosqueName').className = 'text-xl font-extrabold text-slate-800 leading-tight';
+          document.getElementById('digitalClock').className = 'font-mono-clock text-4xl xl:text-5xl font-extrabold text-emerald-600 tracking-tight';
+          document.getElementById('clockAmpm').className = 'font-mono-clock font-bold text-emerald-700 text-sm uppercase';
+          
+          countdown.className = 'p-3 bg-white/60 rounded-2xl border border-white/80 text-center shadow w-1/6 shrink-0 mr-4';
+          pGrid.className = 'flex-1 grid grid-cols-6 gap-3';
+        }
+        renderPrayerBoxes(baseLayout);
+      }
+    }
+
+    function renderPrayerBoxes(layout) {
+      if (layout === 'video-fullscreen') return; 
+      const pGrid = document.getElementById('prayerGrid');
+      const prayers = [
+        { id: 'subuh', name: 'Subuh', time: todayPrayers.subuh },
+        { id: 'syuruk', name: 'Syuruq', time: todayPrayers.syuruk },
+        { id: 'zohor', name: 'Zohor', time: todayPrayers.zohor },
+        { id: 'asar', name: 'Asar', time: todayPrayers.asar },
+        { id: 'maghrib', name: 'Maghrib', time: todayPrayers.maghrib },
+        { id: 'isyak', name: 'Isyak', time: todayPrayers.isyak }
+      ];
+      
+      pGrid.innerHTML = prayers.map(p => {
+        let boxClasses = '', labelClasses = '', timeClasses = '';
+        if (layout === 'vertical') { 
+          boxClasses = 'flex-row items-center justify-between px-5 py-2.5'; 
+          labelClasses = 'text-sm'; 
+          timeClasses = 'text-2xl xl:text-3xl'; 
+        } else { 
+          boxClasses = 'flex-col items-center justify-center py-2 px-2'; 
+          labelClasses = 'text-xs'; 
+          timeClasses = 'text-xl xl:text-2xl'; 
+        }
+        return `
+          <div id="box-${p.id}" class="prayer-box bg-slate-50 border border-slate-200 rounded-2xl flex ${boxClasses} shadow-sm">
+            <span class="prayer-label font-bold uppercase tracking-widest text-slate-500 ${labelClasses}">${p.name}</span>
+            <span id="time-${p.id}" class="prayer-time font-mono-clock font-extrabold text-slate-800 ${timeClasses}">${p.time}</span>
+          </div>
+        `;
+      }).join('');
+      evaluatePrayerState();
+    }
+
+    function renderCarousel() {
+      const container = document.getElementById('carouselContainer');
+      activeSlidesList = (appSettings.slides || []).filter(s => s.visible !== false);
+      if (slideTimeout) clearTimeout(slideTimeout);
+      
+      if (activeSlidesList.length === 0) { 
+        container.innerHTML = `<div class="w-full h-full bg-slate-900 flex items-center justify-center text-slate-400 font-bold text-xl">Tiada Media Aktif</div>`; 
+        return; 
+      }
+
+      container.innerHTML = activeSlidesList.map((s, i) => {
+        const type = getMediaType(s);
+        if (type === 'youtube') return `<div id="slide-${i}" class="slide-media-item opacity-0 z-0 pointer-events-none"><div id="yt-player-container-${i}" class="w-full h-full"></div></div>`;
+        else if (type === 'video') return `<div id="slide-${i}" class="slide-media-item opacity-0 z-0 pointer-events-none"><video id="vid-${i}" class="media-4k-player" src="${s.url}" preload="auto" playsinline ${s.muted !== false ? 'muted' : ''}></video></div>`;
+        return `<div id="slide-${i}" class="slide-media-item opacity-0 z-0 pointer-events-none"><img src="${s.url}" class="w-full h-full object-cover" /></div>`;
+      }).join('');
+
+      if (isYTReady) initYouTubePlayers();
+      currentSlideIndex = 0;
+      setTimeout(() => activateSlide(0), 100);
+    }
+
+    function initYouTubePlayers() {
+      activeSlidesList.forEach((s, i) => {
+        if (getMediaType(s) === 'youtube') {
+          const ytId = extractYouTubeId(s.url);
+          if (ytId && document.getElementById(`yt-player-container-${i}`)) {
+            ytPlayers[i] = new YT.Player(`yt-player-container-${i}`, {
+              videoId: ytId,
+              playerVars: { autoplay: 0, controls: 0, rel: 0, modestbranding: 1, playsinline: 1, mute: s.muted !== false ? 1 : 0 },
+              events: {
+                onStateChange: (e) => { if (e.data === YT.PlayerState.ENDED) activeSlidesList.length > 1 ? nextSlide() : e.target.playVideo(); },
+                onError: () => { slideTimeout = setTimeout(nextSlide, 3000); }
+              }
+            });
+          }
+        }
+      });
+    }
+
+    function activateSlide(index) {
+      if (activeSlidesList.length === 0) return;
+      if (slideTimeout) clearTimeout(slideTimeout);
+
+      const cur = activeSlidesList[index];
+      const type = getMediaType(cur);
+      
+      applyLayout(type === 'video' || type === 'youtube'); 
+
+      activeSlidesList.forEach((s, i) => {
+        const el = document.getElementById(`slide-${i}`);
+        if (getMediaType(s) === 'video') { 
+          const vid = document.getElementById(`vid-${i}`); 
+          if (vid && i !== index) { vid.pause(); vid.currentTime = 0; } 
+        } else if (getMediaType(s) === 'youtube' && ytPlayers[i] && ytPlayers[i].pauseVideo && i !== index) { 
+          ytPlayers[i].pauseVideo(); 
+        }
+
+        if (el) {
+          if (i === index) { 
+            el.style.opacity = '1'; 
+            el.style.zIndex = '10'; 
+            el.classList.remove('pointer-events-none'); 
+          } else { 
+            el.style.opacity = '0'; 
+            el.style.zIndex = '0'; 
+            el.classList.add('pointer-events-none'); 
+          }
+        }
+      });
+
+      document.getElementById('mediaCategoryBadge').textContent = cur.category || "Hebahan";
+
+      if (type === 'youtube') {
+        document.getElementById('videoResolutionLabel').textContent = 'YOUTUBE';
+        const player = ytPlayers[index];
+        if (player && player.playVideo) {
+          if (cur.muted === false && !isPrayerOverlayActive) player.unMute(); else player.mute();
+          if (!isPrayerOverlayActive) player.playVideo();
+        } else { 
+          slideTimeout = setTimeout(() => activateSlide(index), 500); 
+        }
+      } 
+      else if (type === 'video') {
+        const vid = document.getElementById(`vid-${index}`);
+        if (vid) {
+          vid.muted = cur.muted !== false || isPrayerOverlayActive;
+          vid.onloadedmetadata = () => { 
+            document.getElementById('videoResolutionLabel').textContent = vid.videoHeight >= 2160 ? 'VIDEO 4K' : (vid.videoHeight >= 1080 ? 'VIDEO FULL HD' : 'VIDEO'); 
+          };
+          vid.onended = () => { activeSlidesList.length > 1 ? nextSlide() : vid.play(); };
+          vid.onerror = () => { slideTimeout = setTimeout(nextSlide, 3000); };
+          if (!isPrayerOverlayActive) {
+            const playPromise = vid.play();
+            if (playPromise !== undefined) {
+              playPromise.catch(() => { 
+                vid.muted = true; 
+                vid.play().catch(() => { slideTimeout = setTimeout(nextSlide, 4000); }); 
+              });
+            }
+          }
+        }
+      } 
+      else {
+        if (activeSlidesList.length > 1) {
+          slideTimeout = setTimeout(nextSlide, Math.max(5, Number(appSettings.slideDuration || 10)) * 1000);
+        }
+      }
+    }
+
+    function nextSlide() {
+      if (activeSlidesList.length <= 1) return;
+      currentSlideIndex = (currentSlideIndex + 1) % activeSlidesList.length;
+      activateSlide(currentSlideIndex);
+    }
+
+    // --- PENGIRAAN JAM FORMAT 12 JAM (AM/PM) ---
+    function updateClockAndDate() {
+      const now = new Date();
+      let hours = now.getHours();
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+      const ampm = hours >= 12 ? 'PM' : 'AM';
+      
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      const hoursStr = String(hours).padStart(2, '0');
+      const timeStr = `${hoursStr}:${minutes}:${seconds}`;
+      
+      document.getElementById('digitalClock').textContent = timeStr;
+      document.getElementById('clockAmpm').textContent = ampm;
+      
+      const videoClockTxt = document.getElementById('videoClockText');
+      if (videoClockTxt) videoClockTxt.textContent = timeStr;
+      const videoClockAmpm = document.getElementById('videoClockAmpm');
+      if (videoClockAmpm) videoClockAmpm.textContent = ampm;
+      
+      document.getElementById('gregorianDate').textContent = now.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      if (todayPrayers.hijri) document.getElementById('hijriDate').textContent = todayPrayers.hijri;
+    }
+
+    function to12Hour(time24) {
+      if (!time24) return "00:00";
+      const parts = time24.split(':');
+      let h = parseInt(parts[0], 10);
+      const m = parts[1];
+      h = h % 12;
+      h = h ? h : 12;
+      return `${String(h).padStart(2, '0')}:${m}`;
+    }
+
+    async function fetchPrayerTimes(zone) {
+      try {
+        const res = await fetch(`https://www.e-solat.gov.my/index.php?r=esolatApi/takwimsolat&period=today&zone=${encodeURIComponent(zone)}`);
+        if (!res.ok) throw new Error("Gagal hubung JAKIM");
+        const json = await res.json();
+        if (json.prayerTime && json.prayerTime.length > 0) {
+          const p = json.prayerTime[0];
+          todayPrayers = { 
+            rawSubuh: p.fajr.slice(0, 5),
+            rawSyuruk: p.syuruk.slice(0, 5),
+            rawZohor: p.dhuhr.slice(0, 5),
+            rawAsar: p.asr.slice(0, 5),
+            rawMaghrib: p.maghrib.slice(0, 5),
+            rawIsyak: p.isha.slice(0, 5),
+            subuh: to12Hour(p.fajr.slice(0, 5)), 
+            syuruk: to12Hour(p.syuruk.slice(0, 5)), 
+            zohor: to12Hour(p.dhuhr.slice(0, 5)), 
+            asar: to12Hour(p.asr.slice(0, 5)), 
+            maghrib: to12Hour(p.maghrib.slice(0, 5)), 
+            isyak: to12Hour(p.isha.slice(0, 5)), 
+            hijri: p.hijri ? `${parseInt(p.hijri.split('-')[2])} ${["Muharam", "Safar", "Rabiulawal", "Rabiulakhir", "Jamadilawal", "Jamadilakhir", "Rejab", "Syaaban", "Ramadan", "Syawal", "Zulkaedah", "Zulhijjah"][parseInt(p.hijri.split('-')[1])-1]} ${p.hijri.split('-')[0]} H` : "" 
+          };
+          localStorage.setItem(STORAGE_PRAYER, JSON.stringify(todayPrayers));
+        }
+      } catch (e) { 
+        const cached = localStorage.getItem(STORAGE_PRAYER); 
+        if (cached) todayPrayers = JSON.parse(cached); 
+      }
+    }
+
+    function parseTimeToday(hhmm) { 
+      const [h, m] = (hhmm || "00:00").split(':').map(Number); 
+      const d = new Date(); 
+      d.setHours(h, m, 0, 0); 
+      return d; 
+    }
+
+    // --- LOGIK KHAS IQAMAH PELAJAR (10 MINIT SEBELUM 1:30 PM & 4:45 PM) ---
+    function evaluatePrayerState() {
+      const now = new Date();
+      const nowMs = now.getTime();
+
+      const pList = [
+        { key: 'subuh', label: 'SUBUH', date: parseTimeToday(todayPrayers.rawSubuh || "05:55"), hasIqamah: true }, 
+        { key: 'syuruk', label: 'SYURUQ', date: parseTimeToday(todayPrayers.rawSyuruk || "07:05"), hasIqamah: false }, 
+        { key: 'zohor', label: 'ZOHOR', date: parseTimeToday(todayPrayers.rawZohor || "13:15"), hasIqamah: true }, 
+        { key: 'asar', label: 'ASAR', date: parseTimeToday(todayPrayers.rawAsar || "16:30"), hasIqamah: true }, 
+        { key: 'maghrib', label: 'MAGHRIB', date: parseTimeToday(todayPrayers.rawMaghrib || "19:20"), hasIqamah: true }, 
+        { key: 'isyak', label: 'ISYAK', date: parseTimeToday(todayPrayers.rawIsyak || "20:30"), hasIqamah: true }
+      ];
+      
+      let nextP = pList.find(p => p.date > now) || { ...pList[0], date: new Date(pList[0].date.getTime() + 86400000) };
+      const nextPrayerNameEl = document.getElementById('nextPrayerName');
+      if (nextPrayerNameEl) nextPrayerNameEl.textContent = nextP.label;
+      
+      const diffSec = Math.max(0, Math.floor((nextP.date - now) / 1000));
+      const countdownEl = document.getElementById('countdownTimer');
+      if (countdownEl) countdownEl.textContent = `${String(Math.floor(diffSec / 3600)).padStart(2, '0')}:${String(Math.floor((diffSec % 3600) / 60)).padStart(2, '0')}:${String(diffSec % 60).padStart(2, '0')}`;
+      
+      document.querySelectorAll('.prayer-box').forEach(b => b.classList.remove('prayer-active'));
+      const activeBox = document.getElementById(`box-${nextP.key}`);
+      if (activeBox) activeBox.classList.add('prayer-active');
+
+      let overlayState = null;
+      const silentDurationMs = Number(appSettings.silentDuration || 12) * 60000;
+      const isSchoolEnabled = appSettings.schoolSchedule?.enabled !== false;
+
+      const schoolPrayers = [
+        {
+          key: 'zohor',
+          label: 'ZOHOR',
+          targetTime: parseTimeToday(appSettings.schoolSchedule?.zohorSolatTime || "13:30"),
+          iqamahWindowMins: Number(appSettings.iqamah?.zohor || 10)
+        },
+        {
+          key: 'asar',
+          label: 'ASAR',
+          targetTime: parseTimeToday(appSettings.schoolSchedule?.asarSolatTime || "16:45"),
+          iqamahWindowMins: Number(appSettings.iqamah?.asar || 10)
+        }
+      ];
+
+      if (isSchoolEnabled) {
+        for (const sp of schoolPrayers) {
+          const solatMs = sp.targetTime.getTime();
+          const iqamahStartMs = solatMs - (sp.iqamahWindowMins * 60000);
+          const silentEndMs = solatMs + silentDurationMs;
+
+          if (nowMs >= iqamahStartMs && nowMs < solatMs) {
+            overlayState = { mode: 'IQAMAH', label: sp.label, remMs: (solatMs - nowMs) };
+            break;
+          } else if (nowMs >= solatMs && nowMs < silentEndMs) {
+            overlayState = { mode: 'SILENT', remMs: (silentEndMs - nowMs) };
+            break;
+          }
+        }
+      }
+
+      if (!overlayState) {
+        for (const p of pList) {
+          if (!p.hasIqamah) continue;
+          if (isSchoolEnabled && (p.key === 'zohor' || p.key === 'asar')) continue;
+
+          const iqMs = Number(appSettings.iqamah?.[p.key] || 10) * 60000;
+          const azanMs = p.date.getTime();
+
+          if (nowMs >= azanMs && nowMs < azanMs + iqMs) { 
+            overlayState = { mode: 'IQAMAH', label: p.label, remMs: (azanMs + iqMs - nowMs) }; 
+            break; 
+          } else if (nowMs >= azanMs + iqMs && nowMs < azanMs + iqMs + silentDurationMs) { 
+            overlayState = { mode: 'SILENT', remMs: (azanMs + iqMs + silentDurationMs - nowMs) }; 
+            break; 
+          }
+        }
+      }
+
+      const ovlEl = document.getElementById('prayerOverlay');
+      const curVid = document.getElementById(`vid-${currentSlideIndex}`);
+      const curYT = ytPlayers[currentSlideIndex];
+
+      if (overlayState) {
+        if (!isPrayerOverlayActive) { 
+          isPrayerOverlayActive = true; 
+          if (curVid && !curVid.paused) curVid.pause(); 
+          if (curYT && curYT.pauseVideo) curYT.pauseVideo(); 
+        }
+        ovlEl.classList.remove('hidden');
+        
+        if (overlayState.mode === 'IQAMAH') {
+          document.getElementById('iqamahOverlayContent').classList.remove('hidden'); 
+          document.getElementById('silentOverlayContent').classList.add('hidden');
+          document.getElementById('overlayPrayerTitle').textContent = overlayState.label;
+          document.getElementById('iqamahCountdown').textContent = `${String(Math.floor(overlayState.remMs / 60000)).padStart(2, '0')}:${String(Math.floor((overlayState.remMs % 60000) / 1000)).padStart(2, '0')}`;
+        } else {
+          document.getElementById('iqamahOverlayContent').classList.add('hidden'); 
+          document.getElementById('silentOverlayContent').classList.remove('hidden');
+          document.getElementById('silentRemainingText').textContent = `Paparan utama akan bersambung semula dalam ${String(Math.floor(overlayState.remMs / 60000)).padStart(2, '0')}:${String(Math.floor((overlayState.remMs % 60000) / 1000)).padStart(2, '0')}`;
+        }
+      } else {
+        if (isPrayerOverlayActive) { 
+          isPrayerOverlayActive = false; 
+          if (curVid && curVid.paused) curVid.play().catch(()=>{}); 
+          if (curYT && curYT.playVideo) curYT.playVideo(); 
+        }
+        ovlEl.classList.add('hidden');
+      }
+    }
+
+    async function fetchSettings() {
+      try {
+        const res = await fetch('/api/settings'); 
+        if (!res.ok) throw new Error("Gagal memuat turun data pelayan");
+        const data = await res.json();
+        const layoutChanged = appSettings.layout !== data.layout;
+        const zoneChanged = appSettings.zone !== data.zone;
+        const slidesChanged = JSON.stringify(appSettings.slides) !== JSON.stringify(data.slides);
+        
+        appSettings = data; 
+        localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(data));
+        
+        const mosqueNameEl = document.getElementById('mosqueName');
+        if (mosqueNameEl) mosqueNameEl.textContent = data.mosqueName;
+        
+        const tickerTextEl = document.getElementById('tickerText');
+        if (tickerTextEl) {
+          tickerTextEl.textContent = (data.tickers || []).filter(Boolean).join('   ✦   ') || "Selamat datang ke musolla.";
+          tickerTextEl.style.color = data.tickerColor || "#334155";
+        }
+        
+        if (zoneChanged) await fetchPrayerTimes(data.zone);
+        if (layoutChanged || slidesChanged) renderCarousel();
+      } catch (err) { }
+    }
+
+    // Pemicu Skrin Penuh Automatik & Unmute bila TV disentuh / diklik kali pertama
+    window.addEventListener('click', () => {
+      // Masuk ke mod Fullscreen pelayar TV jika belum
+      if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+
+      const cur = activeSlidesList[currentSlideIndex];
+      if (cur && cur.muted === false && !isPrayerOverlayActive) {
+        const type = getMediaType(cur);
+        if (type === 'video') { 
+          const vid = document.getElementById(`vid-${currentSlideIndex}`); 
+          if (vid) { vid.muted = false; vid.play().catch(()=>{}); } 
+        } else if (type === 'youtube' && ytPlayers[currentSlideIndex]) { 
+          ytPlayers[currentSlideIndex].unMute(); 
+          ytPlayers[currentSlideIndex].playVideo(); 
+        }
+      }
+    }, { once: true });
+
+    async function init() {
+      const cSet = localStorage.getItem(STORAGE_SETTINGS); 
+      if (cSet) {
+        try { 
+          appSettings = JSON.parse(cSet); 
+          document.getElementById('mosqueName').textContent = appSettings.mosqueName; 
+          if (document.getElementById('tickerText')) {
+            document.getElementById('tickerText').style.color = appSettings.tickerColor || "#334155";
+          }
+        } catch(e){}
+      }
+      
+      updateClockAndDate(); 
+      await fetchSettings(); 
+      await fetchPrayerTimes(appSettings.zone);
+      renderCarousel(); 
+      evaluatePrayerState();
+      
+      setInterval(() => { updateClockAndDate(); evaluatePrayerState(); }, 1000);
+      setInterval(fetchSettings, 10000); 
+      setInterval(() => fetchPrayerTimes(appSettings.zone), 3600000);
+    }
+    
+    window.onload = init;
+  </script>
+</body>
+</html>

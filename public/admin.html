@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ms" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pentadbir MusollaSritif TV</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { sidebar: '#1e293b', sidebarHov: '#334155' } } } }
+  </script>
+  <script>
+    function applyTheme() {
+      const theme = localStorage.getItem('masjid_theme') || 'auto';
+      if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) { document.documentElement.classList.add('dark'); } 
+      else { document.documentElement.classList.remove('dark'); }
+    }
+    applyTheme();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { if ((localStorage.getItem('masjid_theme') || 'auto') === 'auto') applyTheme(); });
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+    .dark ::-webkit-scrollbar-thumb { background: #475569; }
+    .dragging { opacity: 0.4; border: 2px dashed #059669 !important; }
+  </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 h-screen overflow-hidden flex transition-colors duration-300">
+
+  <!-- BAR SISI -->
+  <aside class="w-64 bg-sidebar text-gray-300 flex flex-col h-full shrink-0 shadow-xl z-20">
+    <div class="p-5 border-b border-gray-700/50 flex items-center space-x-3 cursor-pointer hover:bg-sidebarHov transition">
+      <img src="/logo-sekolah.png" alt="Logo" class="w-10 h-10 object-contain rounded-full bg-white p-0.5" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'%23059669\'%3E%3Cpath d=\'M12 2L2 7v10l10 5 10-5V7L12 2z\'/%3E%3C/svg%3E'" />
+      <div>
+        <h3 class="text-sm font-bold text-white">MusollaSritif</h3>
+        <p class="text-[10px] text-gray-400">Panel Kawalan TV</p>
+      </div>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+      <button id="nav-dashboard" onclick="switchTab('dashboard')" class="nav-item w-full flex items-center space-x-3 px-6 py-3 text-sm font-medium hover:text-white hover:bg-sidebarHov transition bg-sidebarHov border-l-4 border-emerald-500 text-white">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <span>Papan Pemuka (Utama)</span>
+      </button>
+      <button id="nav-library" onclick="switchTab('library')" class="nav-item w-full flex items-center space-x-3 px-6 py-3 text-sm font-medium hover:text-white hover:bg-sidebarHov transition border-l-4 border-transparent">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        <span>Pustaka Media & Hebahan</span>
+      </button>
+      <button id="nav-screens" onclick="switchTab('screens')" class="nav-item w-full flex items-center space-x-3 px-6 py-3 text-sm font-medium hover:text-white hover:bg-sidebarHov transition border-l-4 border-transparent">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <span>Tetapan Skrin TV</span>
+      </button>
+      <div class="px-6 pt-4 pb-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider">Pautan Luar</div>
+      <a href="/display" target="_blank" class="w-full flex items-center space-x-3 px-6 py-2.5 text-sm font-medium text-gray-400 hover:text-emerald-400 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+        <span>Pratonton Paparan TV</span>
+      </a>
+    </nav>
+  </aside>
+
+  <!-- KANDUNGAN UTAMA -->
+  <main class="flex-1 flex flex-col h-full relative">
+    <div id="toast" class="absolute top-20 right-8 z-50 hidden bg-emerald-600 text-white px-5 py-3 rounded-lg shadow-2xl font-medium text-sm flex items-center space-x-2">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+      <span>Tindakan berjaya disimpan!</span>
+    </div>
+
+    <header class="h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-6 shrink-0 shadow-sm z-10 transition-colors">
+      <div class="flex items-center space-x-3">
+        <span class="font-bold text-lg tracking-tight text-gray-800 dark:text-white">musollasritif<span class="text-emerald-500">.tv</span></span>
+      </div>
+      <div class="flex items-center space-x-2">
+        <label class="text-xs font-semibold text-gray-500">Tema:</label>
+        <select id="themeSelect" onchange="setTheme(this.value)" class="text-sm bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-none rounded-lg px-3 py-1.5 focus:ring-0 cursor-pointer outline-none">
+          <option value="auto">🖥️ Ikut Sistem (Auto)</option>
+          <option value="light">☀️ Cerah (Light)</option>
+          <option value="dark">🌙 Gelap (Dark)</option>
+        </select>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto p-6 md:p-8">
+      
+      <!-- ================= TAB 1: Papan Pemuka ================= -->
+      <div id="tab-dashboard" class="tab-content block animate-fade-in">
+        <h2 class="text-2xl font-bold mb-2">Papan Pemuka</h2>
+        <p class="text-gray-500 text-sm mb-6">Ringkasan kandungan paparan TV Musolla.</p>
+        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-8 shadow-sm mb-6">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-y-10 gap-x-6 text-center">
+            <div><div id="statTotalMedia" class="text-4xl md:text-5xl font-light text-gray-800 dark:text-white mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Jumlah Media</div></div>
+            <div><div id="statImages" class="text-4xl md:text-5xl font-light text-gray-800 dark:text-white mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Imej / Poster</div></div>
+            <div><div id="statVideos" class="text-4xl md:text-5xl font-light text-gray-800 dark:text-white mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Video Tempatan</div></div>
+            <div><div id="statYouTube" class="text-4xl md:text-5xl font-light text-gray-800 dark:text-white mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Pautan YouTube</div></div>
+            <div><div id="statTickers" class="text-4xl md:text-5xl font-light text-gray-800 dark:text-white mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Teks Hebahan</div></div>
+            <div><div id="statActive" class="text-4xl md:text-5xl font-light text-emerald-500 mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Status Aktif</div></div>
+            <div><div id="statHidden" class="text-4xl md:text-5xl font-light text-red-500 mb-1">0</div><div class="text-xs font-bold text-gray-400 uppercase">Disorokkan</div></div>
+            <div><div id="statLayout" class="text-xl md:text-2xl font-semibold text-gray-800 dark:text-white mb-1 mt-3 capitalize">Vertical</div><div class="text-xs font-bold text-gray-400 uppercase">Susun Atur Asas</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ================= TAB 2: Pustaka ================= -->
+      <div id="tab-library" class="tab-content hidden animate-fade-in space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold mb-1">Pustaka Media & Hebahan</h2>
+          <p class="text-gray-500 text-sm">Uruskan media, susun atur urutan dengan cara heret (drag-and-drop), dan sesuaikan warna teks.</p>
+        </div>
+
+        <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center space-x-3">
+              <h3 class="text-base font-bold text-gray-800 dark:text-white">Teks Hebahan Berjalan (Ticker Tape)</h3>
+              <div class="flex items-center space-x-2 pl-4 border-l border-gray-200 dark:border-gray-700">
+                <label for="tickerColorInput" class="text-xs font-semibold text-gray-500">Warna Teks:</label>
+                <input type="color" id="tickerColorInput" value="#334155" class="w-8 h-8 rounded border border-gray-300 dark:border-gray-600 cursor-pointer bg-transparent" title="Pilih warna teks hebahan" />
+              </div>
+            </div>
+            <button onclick="addTickerField('')" class="text-xs font-bold bg-emerald-50 text-emerald-600 px-3 py-1.5 rounded-lg border border-emerald-200 hover:bg-emerald-100 transition">+ Tambah Baris</button>
+          </div>
+          <div id="tickerList" class="space-y-2"></div>
+        </section>
+
+        <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
+          <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4">Tambah Media Baru</h3>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+            <input id="newSlideTitle" type="text" placeholder="Tajuk Media" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-emerald-500 outline-none" />
+            <select id="newSlideCategory" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-emerald-500 outline-none">
+              <option value="Aktiviti Musolla">Aktiviti Musolla</option>
+              <option value="Tayangan Video">Tayangan Video</option>
+              <option value="Infak & Wakaf">Infak & Wakaf</option>
+            </select>
+            <select id="newSlideType" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-emerald-500 outline-none">
+              <option value="image">Imej / Poster</option>
+              <option value="video">Fail Video Tempatan</option>
+              <option value="youtube">Pautan YouTube</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3 items-center">
+            <input id="newSlideUrl" type="text" placeholder="URL Media / YouTube / Muat Naik Fail" class="md:col-span-3 w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm focus:border-emerald-500 outline-none" />
+            <div class="flex items-center space-x-4">
+              <label class="flex items-center space-x-1.5 cursor-pointer text-sm font-medium"><input id="newSlideMuted" type="checkbox" checked class="rounded text-emerald-600 focus:ring-0 w-4 h-4" /> <span>Video Senyap</span></label>
+              <label class="flex items-center space-x-1.5 cursor-pointer text-sm font-medium"><input id="newSlideVisible" type="checkbox" checked class="rounded text-emerald-600 focus:ring-0 w-4 h-4" /> <span>Aktif</span></label>
+            </div>
+          </div>
+          <div class="mt-4 flex flex-wrap items-center justify-between gap-4 border-t border-gray-100 dark:border-gray-700 pt-4">
+            <div class="flex items-center space-x-3">
+              <label class="inline-flex items-center space-x-1 text-xs font-bold bg-emerald-50 text-emerald-700 px-4 py-2 rounded-lg cursor-pointer transition border border-emerald-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                <span>Muat Naik Fail (Max 500MB)</span>
+                <input id="mediaFileInput" type="file" accept="image/*,video/mp4,video/webm" class="hidden" onchange="handleFileUpload(event)" />
+              </label>
+              <div id="uploadStatusBox" class="hidden text-xs font-semibold text-gray-500 animate-pulse"></div>
+            </div>
+            <button onclick="addSlideItem()" class="bg-gray-900 text-white font-bold text-xs px-5 py-2 rounded-lg hover:bg-gray-800 transition">Simpan Ke Senarai</button>
+          </div>
+        </section>
+
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center space-x-2">
+              <h3 class="text-base font-bold text-gray-800 dark:text-white">Senarai Pustaka Tayangan</h3>
+              <span class="text-xs text-gray-400 italic">(Boleh heret kad untuk susun urutan)</span>
+            </div>
+            <div class="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
+              <button onclick="setViewMode('list')" id="btnViewList" class="p-1.5 rounded bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400" title="Pemandangan Senarai Padat">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+              </button>
+              <button onclick="setViewMode('grid')" id="btnViewGrid" class="p-1.5 rounded text-gray-500 hover:text-gray-800 dark:hover:text-white transition" title="Pemandangan Kad Grid">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              </button>
+            </div>
+          </div>
+          <div id="slidesContainer" class="flex flex-col gap-3"></div>
+        </div>
+      </div>
+
+      <!-- ================= TAB 3: Tetapan Skrin ================= -->
+      <div id="tab-screens" class="tab-content hidden animate-fade-in space-y-6">
+        <div>
+          <h2 class="text-2xl font-bold mb-1">Tetapan Skrin TV</h2>
+          <p class="text-gray-500 text-sm">Sesuaikan maklumat asas, layout, jadual solat pelajar, dan iqamah.</p>
+        </div>
+
+        <!-- 1. Maklumat Asas & Layout -->
+        <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Nama Musolla</label><input id="mosqueName" type="text" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm outline-none" /></div>
+            <div>
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Zon Waktu Solat JAKIM</label>
+              <select id="zone" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm outline-none">
+                <optgroup label="Pahang"><option value="PHG02">PHG02 - Kuantan, Pekan, Rompin, Muadzam Shah</option><option value="PHG03">PHG03 - Temerloh, Maran, Jerantut</option></optgroup>
+                <optgroup label="Kuala Lumpur & Selangor"><option value="WLY01">WLY01 - Kuala Lumpur, Putrajaya</option><option value="SGR01">SGR01 - Shah Alam, Petaling, Gombak</option></optgroup>
+              </select>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-bold text-gray-500 mb-1.5 uppercase">Susun Atur Asas (Layout untuk Imej/Poster)</label>
+              <select id="layoutStyle" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-4 py-2.5 text-sm outline-none">
+                <option value="vertical">Tegak (Vertical Split) - Kiri Media, Kanan Info</option>
+                <option value="horizontal">Mendatar (Horizontal Split) - Atas Media, Bawah Info</option>
+                <option value="fullscreen">Skrin Penuh (Full Screen) - Media Penuh, Maklumat Terapung</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. JADUAL SOLAT KHAS PELAJAR SEKOLAH -->
+        <section class="bg-white dark:bg-gray-800 border-2 border-emerald-500/40 rounded-xl p-6 shadow-sm">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
+                <span>🔔 Jadual Solat Berjemaah Pelajar Sekolah</span>
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Iqamah akan dilaungkan 10 minit sebelum waktu solat pelajar bermula.</p>
+            </div>
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input id="schoolScheduleEnabled" type="checkbox" checked class="rounded text-emerald-600 focus:ring-0 w-5 h-5" />
+              <span class="text-sm font-bold text-gray-700 dark:text-gray-200">Aktifkan Mod Pelajar</span>
+            </label>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-3 border-t border-gray-100 dark:border-gray-700">
+            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <label class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">Waktu Solat Zohor Pelajar</label>
+              <div class="flex items-center space-x-3">
+                <input id="schoolZohorTime" type="time" value="13:30" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                <span class="text-xs text-gray-500">Iqamah: <b>1:20 PM - 1:30 PM</b></span>
+              </div>
+            </div>
+
+            <div class="bg-gray-50 dark:bg-gray-900/60 p-4 rounded-xl border border-gray-200 dark:border-gray-700">
+              <label class="block text-xs font-bold text-gray-600 dark:text-gray-300 uppercase mb-1">Waktu Solat Asar Pelajar</label>
+              <div class="flex items-center space-x-3">
+                <input id="schoolAsarTime" type="time" value="16:45" class="rounded-lg bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm font-bold text-slate-800 dark:text-white outline-none" />
+                <span class="text-xs text-gray-500">Iqamah: <b>4:35 PM - 4:45 PM</b></span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Durasi Iqamah & Senyap -->
+        <section class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+          <h3 class="text-base font-bold text-gray-800 dark:text-white mb-4">Pengurusan Durasi Menunggu Iqamah & Mod Senyap</h3>
+          <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5">Subuh (Min)</label><input id="iqamahSubuh" type="number" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-center outline-none" /></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5">Zohor (Min)</label><input id="iqamahZohor" type="number" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-center outline-none" /></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5">Asar (Min)</label><input id="iqamahAsar" type="number" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-center outline-none" /></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5">Maghrib (Min)</label><input id="iqamahMaghrib" type="number" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-center outline-none" /></div>
+            <div><label class="block text-xs font-bold text-gray-500 mb-1.5">Isyak (Min)</label><input id="iqamahIsyak" type="number" class="w-full rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-center outline-none" /></div>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+              <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Durasi Senyap Semasa Solat</span>
+              <div class="flex items-center"><input id="silentDuration" type="number" class="w-16 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm text-center rounded outline-none" /><span class="ml-2 text-xs">Minit</span></div>
+            </div>
+            <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-3 rounded-lg">
+              <span class="text-xs font-bold text-gray-600 dark:text-gray-300">Tempoh Slaid Imej</span>
+              <div class="flex items-center"><input id="slideDuration" type="number" class="w-16 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 px-2 py-1 text-sm text-center rounded outline-none" /><span class="ml-2 text-xs">Saat</span></div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <div class="absolute bottom-8 right-8 z-40">
+      <button onclick="saveAllSettings()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm px-6 py-3 rounded-full shadow-lg shadow-emerald-500/30 transition transform hover:scale-105 flex items-center space-x-2 border-2 border-white/20">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+        <span>Simpan Perubahan ke TV</span>
+      </button>
+    </div>
+  </main>
+
+  <style>.animate-fade-in { animation: fadeIn 0.3s ease-in-out; } @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }</style>
+  
+  <script>
+    let slidesState = [];
+    let currentViewMode = 'list';
+    let draggedIndex = null;
+
+    function setTheme(val) { localStorage.setItem('masjid_theme', val); applyTheme(); }
+    document.getElementById('themeSelect').value = localStorage.getItem('masjid_theme') || 'auto';
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.nav-item').forEach(el => { el.classList.remove('bg-sidebarHov', 'border-emerald-500', 'text-white'); el.classList.add('border-transparent'); });
+      document.getElementById('tab-' + tabId).classList.remove('hidden');
+      const activeNav = document.getElementById('nav-' + tabId);
+      activeNav.classList.remove('border-transparent'); activeNav.classList.add('bg-sidebarHov', 'border-emerald-500', 'text-white');
+      if (tabId === 'dashboard') updateDashboardStats();
+    }
+
+    function showToast() { const t = document.getElementById('toast'); t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      const match = url.match(/^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/);
+      return (match && match[2].length === 11) ? match[2] : null;
+    }
+
+    function addTickerField(val = '') {
+      const container = document.getElementById('tickerList');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'flex items-center gap-2';
+      wrapper.innerHTML = `
+        <input type="text" value="${val.replace(/"/g, '&quot;')}" class="flex-1 rounded-md bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-600 px-3 py-1.5 text-sm outline-none ticker-input" />
+        <button onclick="this.parentElement.remove()" class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 p-1.5 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+      `;
+      container.appendChild(wrapper);
+    }
+
+    function handleDragStart(e, index) {
+      draggedIndex = index;
+      e.dataTransfer.effectAllowed = 'move';
+      e.target.classList.add('dragging');
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+    }
+
+    function handleDrop(e, targetIndex) {
+      e.preventDefault();
+      if (draggedIndex === null || draggedIndex === targetIndex) return;
+      const item = slidesState.splice(draggedIndex, 1)[0];
+      slidesState.splice(targetIndex, 0, item);
+      draggedIndex = null;
+      renderSlidesList();
+    }
+
+    function handleDragEnd(e) {
+      e.target.classList.remove('dragging');
+      draggedIndex = null;
+    }
+
+    function moveSlide(idx, direction) {
+      if (direction === 'up' && idx > 0) {
+        const temp = slidesState[idx]; slidesState[idx] = slidesState[idx - 1]; slidesState[idx - 1] = temp;
+      } else if (direction === 'down' && idx < slidesState.length - 1) {
+        const temp = slidesState[idx]; slidesState[idx] = slidesState[idx + 1]; slidesState[idx + 1] = temp;
+      }
+      renderSlidesList();
+    }
+
+    function setViewMode(mode) {
+      currentViewMode = mode;
+      const btnList = document.getElementById('btnViewList');
+      const btnGrid = document.getElementById('btnViewGrid');
+      
+      if (mode === 'list') {
+        btnList.className = 'p-1.5 rounded bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400 transition';
+        btnGrid.className = 'p-1.5 rounded text-gray-500 hover:text-gray-800 dark:hover:text-white transition';
+      } else {
+        btnGrid.className = 'p-1.5 rounded bg-white dark:bg-gray-600 shadow text-emerald-600 dark:text-emerald-400 transition';
+        btnList.className = 'p-1.5 rounded text-gray-500 hover:text-gray-800 dark:hover:text-white transition';
+      }
+      renderSlidesList();
+    }
+
+    function toggleVisibility(index) { slidesState[index].visible = !(slidesState[index].visible !== false); renderSlidesList(); }
+    function toggleAudio(index) { slidesState[index].muted = !(slidesState[index].muted === false); renderSlidesList(); }
+    function removeSlide(idx) { if (confirm("Padam media ini?")) { slidesState.splice(idx, 1); renderSlidesList(); } }
+
+    function renderSlidesList() {
+      const container = document.getElementById('slidesContainer');
+      
+      if (slidesState.length === 0) {
+        container.className = "flex flex-col gap-3";
+        container.innerHTML = `<div class="p-5 text-center text-sm text-gray-400 border border-dashed border-gray-300 dark:border-gray-700 rounded-xl">Tiada media buat masa ini.</div>`;
+        updateDashboardStats(); return;
+      }
+
+      if (currentViewMode === 'grid') {
+        container.className = "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
+        container.innerHTML = slidesState.map((s, idx) => {
+          const isVisible = s.visible !== false; 
+          const ytId = extractYouTubeId(s.url); 
+          const isVid = s.type === 'video' || /\.(mp4|webm|mkv|mov)(\?.*)?$/i.test(s.url);
+          let preview = ''; let badge = '';
+          if (ytId) { preview = `<img src="https://img.youtube.com/vi/${ytId}/hqdefault.jpg" class="w-full h-40 object-cover opacity-90" />`; badge = `<span class="bg-red-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow">▶ YouTube</span>`; } 
+          else if (isVid) { preview = `<video src="${s.url}" class="w-full h-40 object-cover opacity-90"></video>`; badge = `<span class="bg-blue-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow">🎬 Video</span>`; } 
+          else { preview = `<img src="${s.url}" class="w-full h-40 object-cover opacity-90" />`; badge = `<span class="bg-emerald-500 text-white px-2 py-0.5 rounded text-[10px] font-bold uppercase shadow">🖼️ Imej</span>`; }
+
+          return `
+            <div draggable="true" ondragstart="handleDragStart(event, ${idx})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${idx})" ondragend="handleDragEnd(event)"
+                 class="group bg-white dark:bg-gray-800 border ${isVisible ? 'border-gray-200 dark:border-gray-700' : 'border-dashed border-gray-300 dark:border-gray-600 opacity-60'} rounded-xl overflow-hidden shadow-sm hover:shadow-md transition relative cursor-move">
+              <div class="absolute top-2 right-2 flex flex-col space-y-1 z-10 bg-black/50 p-1 rounded backdrop-blur">
+                <button onclick="moveSlide(${idx}, 'up')" ${idx === 0 ? 'disabled' : ''} class="${idx === 0 ? 'text-gray-500' : 'text-white hover:text-emerald-400'}"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+                <button onclick="moveSlide(${idx}, 'down')" ${idx === slidesState.length-1 ? 'disabled' : ''} class="${idx === slidesState.length-1 ? 'text-gray-500' : 'text-white hover:text-emerald-400'}"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+              </div>
+              <div class="relative">
+                ${preview}
+                <div class="absolute top-3 left-3 flex space-x-2">${badge} <span class="${isVisible ? 'bg-gray-900 text-white' : 'bg-gray-500 text-gray-200'} px-2 py-0.5 rounded text-[10px] font-bold shadow">${isVisible ? 'Aktif' : 'Disorok'}</span></div>
+              </div>
+              <div class="p-4">
+                <h4 class="font-bold text-sm text-gray-800 dark:text-white truncate mb-1" title="${s.title}">${s.title}</h4>
+                <p class="text-[11px] text-gray-500 truncate mb-4">${(isVid || ytId) ? (s.muted === false ? '🔊 Audio ON' : '🔇 Muted') + ' • ' : ''}${s.category || 'Tiada Kategori'}</p>
+                <div class="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
+                  <div class="flex space-x-2">
+                    <button onclick="toggleVisibility(${idx})" class="text-[10px] font-bold px-3 py-1.5 rounded-md ${isVisible ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30'}">${isVisible ? 'Sorok' : 'Aktifkan'}</button>
+                    ${(isVid || ytId) ? `<button onclick="toggleAudio(${idx})" class="text-[10px] font-bold px-3 py-1.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">${s.muted === false ? 'Senyapkan' : 'Buka Suara'}</button>` : ''}
+                  </div>
+                  <button onclick="removeSlide(${idx})" class="text-gray-400 hover:text-red-500"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      } else {
+        container.className = "flex flex-col gap-3";
+        container.innerHTML = slidesState.map((s, idx) => {
+          const isVisible = s.visible !== false; 
+          const ytId = extractYouTubeId(s.url); 
+          const isVid = s.type === 'video' || /\.(mp4|webm|mkv|mov)(\?.*)?$/i.test(s.url);
+          let imgThumb = s.url;
+          if (ytId) imgThumb = `https://img.youtube.com/vi/${ytId}/default.jpg`;
+          else if (isVid) imgThumb = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E";
+
+          return `
+            <div draggable="true" ondragstart="handleDragStart(event, ${idx})" ondragover="handleDragOver(event)" ondrop="handleDrop(event, ${idx})" ondragend="handleDragEnd(event)"
+                 class="flex flex-row items-center bg-white dark:bg-gray-800 border ${isVisible ? 'border-gray-200 dark:border-gray-700' : 'border-dashed border-gray-300 opacity-50'} rounded-lg p-2.5 shadow-sm hover:shadow-md transition cursor-move">
+              <div class="flex items-center space-x-1 mr-3 text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16"></path></svg>
+                <div class="flex flex-col space-y-0.5">
+                  <button onclick="moveSlide(${idx}, 'up')" ${idx === 0 ? 'disabled' : ''} class="${idx === 0 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 hover:text-emerald-500'}"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg></button>
+                  <button onclick="moveSlide(${idx}, 'down')" ${idx === slidesState.length-1 ? 'disabled' : ''} class="${idx === slidesState.length-1 ? 'text-gray-300 dark:text-gray-600' : 'text-gray-500 hover:text-emerald-500'}"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></button>
+                </div>
+              </div>
+              
+              <div class="w-20 h-14 bg-gray-200 dark:bg-gray-900 rounded overflow-hidden flex-shrink-0 flex items-center justify-center mr-4">
+                ${isVid && !ytId ? `<svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>` : `<img src="${imgThumb}" class="w-full h-full object-cover" />`}
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center space-x-2 mb-0.5">
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded text-white ${ytId ? 'bg-red-500' : isVid ? 'bg-blue-500' : 'bg-emerald-500'} uppercase tracking-wider">${ytId ? 'YouTube' : isVid ? 'Video' : 'Imej'}</span>
+                  <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-700 text-gray-500 uppercase tracking-wider">${s.category || 'Hebahan'}</span>
+                  ${!isVisible ? `<span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-gray-600 text-white">Disorok</span>` : ''}
+                </div>
+                <h4 class="text-sm font-bold text-gray-800 dark:text-gray-100 truncate">${s.title}</h4>
+                <p class="text-[10px] text-gray-400 truncate">${(isVid || ytId) ? (s.muted === false ? '🔊 Audio ON' : '🔇 Muted') + ' • ' : ''}${s.url}</p>
+              </div>
+              
+              <div class="flex items-center space-x-2 ml-4">
+                <button onclick="toggleVisibility(${idx})" class="text-[10px] font-bold px-3 py-1.5 rounded bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600">${isVisible ? 'Sorok' : 'Aktifkan'}</button>
+                ${(isVid || ytId) ? `<button onclick="toggleAudio(${idx})" class="text-[10px] font-bold px-3 py-1.5 rounded bg-gray-100 dark:bg-gray-700 hover:bg-gray-200">${s.muted === false ? 'Senyapkan' : 'Buka Suara'}</button>` : ''}
+                <button onclick="removeSlide(${idx})" class="text-gray-400 hover:text-red-500 p-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      updateDashboardStats();
+    }
+
+    function addSlideItem() {
+      const title = document.getElementById('newSlideTitle').value.trim() || 'Media Tanpa Tajuk';
+      const url = document.getElementById('newSlideUrl').value.trim();
+      const category = document.getElementById('newSlideCategory').value;
+      let type = document.getElementById('newSlideType').value;
+      const muted = document.getElementById('newSlideMuted').checked;
+      const visible = document.getElementById('newSlideVisible').checked;
+      if (!url) return alert('Sila masukkan pautan URL / YouTube atau muat naik fail terlebih dahulu.');
+      if (extractYouTubeId(url)) type = 'youtube';
+      slidesState.push({ id: Date.now(), title, url, category, type, muted, visible });
+      document.getElementById('newSlideTitle').value = ''; document.getElementById('newSlideUrl').value = '';
+      renderSlidesList();
+    }
+
+    async function handleFileUpload(event) {
+      const file = event.target.files[0]; if (!file) return;
+      const statusBox = document.getElementById('uploadStatusBox'); statusBox.classList.remove('hidden'); statusBox.textContent = `⏳ Memuat naik: ${file.name}...`;
+      const formData = new FormData(); formData.append('media', file);
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData }); const data = await res.json();
+        if (data.status === 'berjaya') { document.getElementById('newSlideUrl').value = data.url; document.getElementById('newSlideType').value = data.type; statusBox.textContent = `✅ Selesai. Klik 'Simpan Ke Senarai'.`; } 
+        else { statusBox.textContent = `❌ Gagal: ${data.message}`; }
+      } catch (err) { statusBox.textContent = '❌ Ralat rangkaian.'; }
+    }
+
+    async function loadCurrentSettings() {
+      try {
+        const res = await fetch('/api/settings'); const data = await res.json();
+        document.getElementById('mosqueName').value = data.mosqueName || ''; 
+        document.getElementById('zone').value = data.zone || 'PHG02'; 
+        document.getElementById('layoutStyle').value = data.layout || 'vertical';
+        document.getElementById('tickerColorInput').value = data.tickerColor || '#334155';
+        
+        // Tetapan Jadual Solat Pelajar
+        document.getElementById('schoolScheduleEnabled').checked = data.schoolSchedule?.enabled !== false;
+        document.getElementById('schoolZohorTime').value = data.schoolSchedule?.zohorSolatTime || '13:30';
+        document.getElementById('schoolAsarTime').value = data.schoolSchedule?.asarSolatTime || '16:45';
+
+        document.getElementById('iqamahSubuh').value = data.iqamah?.subuh ?? 15; 
+        document.getElementById('iqamahZohor').value = data.iqamah?.zohor ?? 10; 
+        document.getElementById('iqamahAsar').value = data.iqamah?.asar ?? 10; 
+        document.getElementById('iqamahMaghrib').value = data.iqamah?.maghrib ?? 10; 
+        document.getElementById('iqamahIsyak').value = data.iqamah?.isyak ?? 10;
+        document.getElementById('silentDuration').value = data.silentDuration ?? 12; 
+        document.getElementById('slideDuration').value = data.slideDuration ?? 10;
+        
+        const tContainer = document.getElementById('tickerList'); tContainer.innerHTML = ''; 
+        (data.tickers || []).forEach(t => addTickerField(t));
+        
+        slidesState = Array.isArray(data.slides) ? data.slides : []; 
+        renderSlidesList(); 
+        updateDashboardStats();
+      } catch (err) { alert('Gagal memuatkan tetapan.'); }
+    }
+
+    function updateDashboardStats() {
+      const total = slidesState.length; let yt = 0, vid = 0, img = 0, active = 0, hidden = 0;
+      slidesState.forEach(s => {
+        if (s.visible !== false) active++; else hidden++;
+        const ytId = extractYouTubeId(s.url); const isVid = s.type === 'video' || /\.(mp4|webm|mkv|mov)(\?.*)?$/i.test(s.url);
+        if (ytId) yt++; else if (isVid) vid++; else img++;
+      });
+      document.getElementById('statTotalMedia').textContent = total; document.getElementById('statImages').textContent = img; document.getElementById('statVideos').textContent = vid; document.getElementById('statYouTube').textContent = yt; document.getElementById('statActive').textContent = active; document.getElementById('statHidden').textContent = hidden;
+      document.getElementById('statTickers').textContent = document.querySelectorAll('.ticker-input').length; document.getElementById('statLayout').textContent = document.getElementById('layoutStyle').value;
+    }
+
+    async function saveAllSettings() {
+      const tickers = Array.from(document.querySelectorAll('.ticker-input')).map(input => input.value.trim()).filter(Boolean);
+      const payload = {
+        mosqueName: document.getElementById('mosqueName').value.trim(), 
+        zone: document.getElementById('zone').value, 
+        layout: document.getElementById('layoutStyle').value,
+        tickerColor: document.getElementById('tickerColorInput').value,
+        schoolSchedule: {
+          enabled: document.getElementById('schoolScheduleEnabled').checked,
+          zohorSolatTime: document.getElementById('schoolZohorTime').value || '13:30',
+          asarSolatTime: document.getElementById('schoolAsarTime').value || '16:45'
+        },
+        iqamah: { 
+          subuh: Number(document.getElementById('iqamahSubuh').value), 
+          zohor: Number(document.getElementById('iqamahZohor').value), 
+          asar: Number(document.getElementById('iqamahAsar').value), 
+          maghrib: Number(document.getElementById('iqamahMaghrib').value), 
+          isyak: Number(document.getElementById('iqamahIsyak').value) 
+        },
+        silentDuration: Number(document.getElementById('silentDuration').value), 
+        slideDuration: Number(document.getElementById('slideDuration').value), 
+        tickers, 
+        slides: slidesState
+      };
+      try {
+        const res = await fetch('/api/settings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if ((await res.json()).status === 'berjaya') { showToast(); updateDashboardStats(); } else alert('Ralat menyimpan.');
+      } catch (err) { alert('Gagal berhubung dengan pelayan.'); }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { loadCurrentSettings(); switchTab('dashboard'); });
+  </script>
+</body>
+</html>
